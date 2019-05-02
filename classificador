@@ -1,0 +1,212 @@
+https://github.com/MaxAAPMendes/Apresend_Super_Classificador_Sentimentos.git
+
+<h1>CLASSIFICAR SENTIMENTOS</h2>
+
+Alunos:
+
+Max Pinheiro
+Robson Reguim
+
+<h5>Obejtivos</h5>
+<p>Aprendizado Supervisionado - Classificador de sentimentos utilizando algorítimo Naive Bayes e base de dados do site amazon</p>
+
+<h5>Legendas</h5>
+<p>Negativo: 0</p>
+<p>Positivo: 1</p>
+
+#exportas os dados
+arquivo = open('C:/Python/classificacao/dataset/sentiment labelled sentences/amazon_cells_labelled.txt', 'r')
+
+arquivo
+
+dados = arquivo.read().split('\n')#o separador \n pular uma linha
+
+print(dados)
+type(dados)
+
+len(dados)
+
+#tratamento dos dados
+#verificicar se todas as linhas possuem dois campos, sentimento e código
+# 0 para negativo e 1 para positivo
+dados_limpos = []
+for dado in dados:
+    #print(dado)
+    if len(dado.split('\t'))==2 and dado.split('\t')[1] != '':
+        dados_limpos.append(dado)
+
+print(dados_limpos)
+
+len(dados_limpos)
+
+<h3>Definindo tamanho da base para Treinamento e Teste</h3>
+
+quantidade_total = len(dados_limpos)
+dados_treinamento = []
+dados_teste = []
+percentual_treino = 0.75
+
+
+for indice in range(0, quantidade_total):
+    if indice < quantidade_total * percentual_treino:
+        dados_treinamento.append(dados_limpos[indice])
+    else:
+        dados_teste.append(dados_limpos[indice])
+
+
+type(dados_treinamento)
+
+len(dados_treinamento)
+
+len(dados_teste)
+
+print(dados_treinamento)
+
+<h3>Treinamento</h3>
+
+#CountVectorizer gera a representação de FREQUÊNCIA das palavras
+from sklearn.feature_extraction.text import CountVectorizer
+
+#classificador
+from sklearn.naive_bayes import BernoulliNB
+
+treino_respostas = []
+for indice in range(0, len(dados_treinamento)):
+    treino_respostas.append(dados_treinamento[indice][-1:]) 
+
+#dados_treinamento[0][-1:]#result '0'
+
+
+print(treino_respostas[:5])
+
+len(dados_treinamento[0])-1
+
+treino_comentarios = []
+for indice in range(0, len(dados_treinamento)):
+    treino_comentarios.append(dados_treinamento[indice][:(len(dados_treinamento[indice]))-2]) 
+
+print(treino_comentarios[:5])
+
+vetorizador = CountVectorizer()
+
+#vetorizar frequência de palavras
+treino_comentarios = vetorizador.fit_transform(treino_comentarios)
+
+type(treino_comentarios)
+
+print(treino_comentarios)
+
+#fazer adequação via método fit
+modelo = BernoulliNB()
+#classificador = BernoulliNB().fit(treino_comentarios, treino_respostas)
+
+#teste apagar essa linha caso não ocorra sucesso
+modelo.fit(treino_comentarios, treino_respostas)
+resultado = modelo.predict(vetorizador.transform(['i hate this movie']))
+
+print('0 - Comentário NEGATIVO!' if resultado == '0' else '1 - Comentário POSITIVO!')
+
+resultado = modelo.predict(vetorizador.transform(['i hate this movie']))
+
+print('0 - Comentário NEGATIVO!' if resultado == '0' else '1 - Comentário POSITIVO!')
+
+resultado = modelo.predict(vetorizador.transform(['it sucks']))
+
+print('0 - Comentário NEGATIVO!' if resultado == '0' else '1 - Comentário POSITIVO!')
+
+resultado = modelo.predict(vetorizador.transform(['it is awful']))
+
+print('0 - Comentário NEGATIVO!' if resultado == '0' else '1 - Comentário POSITIVO!')
+
+lista = ['this is the best movie', 'awesome!', 'so bad', 'this is worst movie']
+
+type(lista)
+
+for x in lista:
+    print("Comentário Positivo" if (modelo.predict(vetorizador.transform([x]))=='1') else "Comentário Negativo")
+
+<h3>Teste</h3>
+
+print(dados_teste)
+
+teste_comentarios = []
+for indice in range(0, len(dados_teste)):
+    teste_comentarios.append(dados_teste[indice][:(len(dados_teste[indice]))-2]) 
+
+print(teste_comentarios[:5])
+
+type(teste_comentarios)
+
+teste_respostas = []
+for indice in range(0, len(dados_teste)):
+    teste_respostas.append(dados_teste[indice][-1:]) 
+
+print(teste_respostas[:5])
+
+type(teste_respostas)
+
+lista_teste_comentarios_resultado = []
+for x in teste_comentarios:
+    lista_teste_comentarios_resultado.append(modelo.predict(vetorizador.transform([x])))
+
+type(lista_teste_comentarios_resultado)
+
+print(lista_teste_comentarios_resultado[0:5])
+
+<h3>Verificando a Acurácia ePrecisão</h3>
+
+#marcações respostas - atribuição dos positivos e negativos
+teste_comentarios_positivos = teste_respostas.count('1')
+teste_comentarios_negativos = teste_respostas.count('0')
+
+#confirma o total de comentários no teste
+teste_total_comentarios = (teste_comentarios_positivos + teste_comentarios_negativos)
+print(teste_comentarios_positivos)
+print(teste_comentarios_negativos)
+print(total_comentarios)
+
+#resultado dos testes - atribuição dos positivos e negativos
+resultado_positivos = lista_teste_comentarios_resultado.count('1')
+resultado_negativos = lista_teste_comentarios_resultado.count('0')
+
+#confirma o total de comentários no resultado
+resultado_total_comentarios = (resultado_positivos + resultado_negativos)
+print(resultado_positivos)
+print(resultado_negativos)
+print(resultado_total_comentarios)
+
+#verificando acurácia pelos resultados negativos e positivos
+print(resultado_negativos/teste_comentarios_negativos)
+print(teste_comentarios_positivos/resultado_positivos)
+acuracia = (resultado_negativos/teste_comentarios_negativos)*100
+
+print('Acurácia do algorítmo é de: %f' % acuracia + '%')
+
+verdadeiro_negativo = 0
+falso_negativo = 0
+verdadeiro_positivo = 0
+falso_positivo = 0
+
+tam = len(teste_respostas)
+
+for x in range(0, tam):
+    if teste_respostas[x] == '0': #negativo
+        if teste_respostas[x] == lista_teste_comentarios_resultado[x]:
+            verdadeiro_negativo = verdadeiro_negativo + 1
+        else:
+            falso_negativo = falso_negativo + 1
+    else:#positivo
+        if teste_respostas[x] == lista_teste_comentarios_resultado[x]:
+            verdadeiro_positivo = verdadeiro_positivo + 1
+        else:
+            falso_positivo = falso_positivo + 1
+print('Verdadeiro negativo: %d' % verdadeiro_negativo)
+print('Falso negativo: %d' % falso_negativo)
+print('Verdadeiro positivo: %d' % verdadeiro_positivo)
+print('Falso positivo: %d' % falso_positivo)
+
+precisao = (verdadeiro_positivo/(verdadeiro_positivo+falso_positivo))*100
+print(precisao)
+
+print('Precisão do algorítmo é de: %4.3f' % precisao + '%')
+
